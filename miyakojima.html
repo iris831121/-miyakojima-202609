@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宮古島 4日遊 🏖️</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC','Hiragino Sans','PingFang TC',sans-serif;
+  background: #F5F0EB;
+  min-height: 100vh;
+}
+.wrap { max-width: 430px; margin: 0 auto; }
+
+/* Hero */
+.hero {
+  background: linear-gradient(180deg, #1A5F7A 0%, #2E8B9A 50%, #4ABBC4 100%);
+  padding: 32px 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+.hero-wave {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 40px;
+}
+.hero-label { font-size: 11px; letter-spacing: 3px; color: #A8E6EF; font-weight: 600; margin-bottom: 6px; }
+.hero-title { font-size: 36px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+.hero-date { font-size: 13px; color: #C8F0F5; margin-bottom: 24px; }
+.hero-illust {
+  position: absolute; right: 20px; top: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+
+/* Tabs */
+.tabs-wrap { background: #F5F0EB; padding: 16px 16px 0; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 0; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-radius: 50px;
+  border: 2px solid #D0C8BF;
+  cursor: pointer;
+  background: #FFF;
+  text-align: center;
+  transition: all 0.2s;
+  min-width: 72px;
+}
+.tab.active {
+  background: #1A5F7A;
+  border-color: #1A5F7A;
+  color: #fff;
+}
+.tab-day { font-size: 14px; font-weight: 800; color: inherit; }
+.tab-date { font-size: 10px; color: #9E8E80; margin-top: 1px; }
+.tab.active .tab-date { color: #A8E6EF; }
+
+/* Day header */
+.day-header {
+  padding: 20px 20px 12px;
+  background: #F5F0EB;
+}
+.day-num { font-size: 52px; font-weight: 900; color: #1A5F7A; line-height: 1; }
+.day-num span { font-size: 22px; color: #9E8E80; }
+.day-weekday { font-size: 12px; color: #9E8E80; margin-top: 2px; letter-spacing: 1px; }
+.day-subtitle { font-size: 18px; font-weight: 900; color: #2C2010; margin-top: 4px; }
+.day-hotel {
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid #E0D8D0;
+}
+.hotel-label { font-size: 10px; font-weight: 700; color: #9E8E80; letter-spacing: 1px; margin-bottom: 4px; }
+.hotel-name { font-size: 14px; font-weight: 800; color: #2C2010; margin-bottom: 2px; }
+.hotel-price { font-size: 12px; color: #1A5F7A; font-weight: 600; }
+.hotel-note { font-size: 11px; color: #C47A50; margin-top: 3px; }
+
+/* Timeline */
+.timeline { padding: 0 16px 32px; position: relative; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 36px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(#4ABBC4, #1A5F7A88);
+}
+.tl-item { display: flex; gap: 12px; margin-bottom: 16px; position: relative; }
+.tl-time {
+  flex-shrink: 0; width: 40px;
+  font-size: 11px; font-weight: 800; color: #1A5F7A;
+  text-align: right; padding-top: 14px;
+}
+.tl-dot-wrap {
+  flex-shrink: 0; width: 16px;
+  display: flex; justify-content: center; padding-top: 14px;
+  position: relative; z-index: 1;
+}
+.tl-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #1A5F7A; border: 2px solid #F5F0EB;
+  box-shadow: 0 0 0 2px #1A5F7A;
+}
+.tl-dot.yellow { background: #F5C842; box-shadow: 0 0 0 2px #F5C842; }
+.tl-dot.blue-outline { background: #F5F0EB; border: 2px solid #1A5F7A; box-shadow: 0 0 0 2px #1A5F7A; }
+.tl-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  border: 1.5px solid #E8E0D8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.tl-card.highlight { border-color: #4ABBC4; border-width: 2px; }
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  margin-right: 5px; margin-bottom: 6px;
+}
+.tag-spot { background: #1A5F7A; color: #fff; }
+.tag-food { background: #2E8B9A; color: #fff; }
+.tag-flight { background: #4A4A6A; color: #fff; }
+.tag-hotel { background: #7A5A3A; color: #fff; }
+.tag-activity { background: #3A8A5A; color: #fff; }
+.tag-reserved { background: #F5C842; color: #4A3A10; }
+.tag-warning { background: #F5A030; color: #fff; }
+.tag-current { background: #E8F8EA; color: #2A7A3A; border: 1.5px solid #4ABA6A; }
+.card-title { font-size: 17px; font-weight: 900; color: #1A1A1A; margin-bottom: 2px; }
+.card-sub { font-size: 12px; color: #8A7A6A; margin-bottom: 8px; }
+.card-info { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6A5A4A; margin-bottom: 4px; }
+.tip-box {
+  background: #FEF9EC;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-left: 3px solid #F5C842;
+}
+.tip-box p { font-size: 12px; color: #5A4A30; line-height: 1.6; }
+.tip-icon { font-size: 14px; margin-right: 4px; }
+.map-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px;
+  background: #F5F0EB;
+  border: 1.5px solid #D0C8BF;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 12px; font-weight: 700; color: #4A3A2A;
+  text-decoration: none; cursor: pointer;
+}
+.map-btn:hover { background: #EAE3DA; }
+.people-row { font-size: 11px; color: #7A6A5A; margin-top: 4px; }
+.carry-list { margin-top: 6px; }
+.carry-list li { font-size: 12px; color: #5A4A3A; margin-bottom: 2px; list-style: none; padding-left: 14px; position: relative; }
+.carry-list li::before { content: '・'; position: absolute; left: 0; color: #4ABBC4; }
+.cost-card {
+  background: #1A5F7A;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 0 16px 16px;
+  color: #fff;
+}
+.cost-title { font-size: 12px; letter-spacing: 1px; color: #A8E6EF; margin-bottom: 8px; }
+.cost-total { font-size: 24px; font-weight: 900; margin-bottom: 4px; }
+.cost-per { font-size: 12px; color: #C8F0F5; }
+.footer { text-align: center; padding: 16px 0 24px; font-size: 11px; color: #9E8E80; }
+
+
+/* Map */
+.map-container {
+  width: 100%; height: 260px;
+  border-radius: 0;
+  overflow: hidden;
+  position: relative;
+}
+.leaflet-container { background: #B8E4F0; }
+.day-marker {
+  background: #1A5F7A;
+  color: white;
+  border-radius: 50%;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-label">MIYAKOJIMA · OKINAWA</div>
+  <div class="hero-title">宮古島 4天3夜</div>
+  <div class="hero-date">9/27 – 9/30 · 2025</div>
+  <div class="hero-illust">
+    <svg width="80" height="70" viewBox="0 0 80 70" fill="none">
+      <ellipse cx="40" cy="58" rx="28" ry="6" fill="#4ABBC444"/>
+      <path d="M12 56 Q25 42 40 56 Q55 42 68 56" stroke="#4ABBC4" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M18 50 Q25 36 40 50 Q55 36 62 50" stroke="#6ACBD4" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="54" cy="16" r="5" fill="#F5C842"/>
+      <rect x="36" y="14" width="3" height="28" rx="1.5" fill="#1A5F7A"/>
+      <path d="M39 14 Q50 20 39 26Z" fill="#4ABBC4"/>
+      <circle cx="26" cy="38" r="10" fill="#2E8B9A" opacity="0.9"/>
+      <circle cx="40" cy="34" r="10" fill="#1A5F7A" opacity="0.9"/>
+      <circle cx="33" cy="28" r="3" fill="#fff" opacity="0.6"/>
+      <circle cx="45" cy="30" r="2" fill="#fff" opacity="0.5"/>
+    </svg>
+  </div>
+  <svg class="hero-wave" viewBox="0 0 430 40" preserveAspectRatio="none">
+    <path d="M0 20 Q54 0 108 20 Q162 40 216 20 Q270 0 324 20 Q378 40 430 20 L430 40 L0 40Z" fill="#F5F0EB"/>
+  </svg>
+</div>
+
+<!-- Map -->
+<div class="map-container">
+  <div id="trip-map" style="width:100%;height:100%;"></div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<!-- Content -->
+<div id="content"></div>
+<div class="footer">🏖️ 宮古島 · 2025年秋 · 家族旅行</div>
+</div>
+
+<script>
+
+var DAY_COORDS = [
+  [ // Day 1
+    {name:"下地島機場", lat:24.8267, lng:125.1447, icon:"✈️", map:"https://www.google.com/maps/search/?api=1&query=下地島空港"},
+    {name:"川満商店", lat:24.8031, lng:125.2785, icon:"🍽️", map:"https://www.google.com/maps/search/?api=1&query=川満商店+宮古島"},
+    {name:"宮古島市公設市場", lat:24.8046, lng:125.2819, icon:"🍮", map:"https://www.google.com/maps/search/?api=1&query=宮古島市公設市場"},
+    {name:"CLASS THE FIRST", lat:24.7627, lng:125.3658, icon:"🛌", map:"https://maps.app.goo.gl/grPNMBsPNkLGae3T7"},
+    {name:"宮古牛燒肉玉城", lat:24.8043, lng:125.2791, icon:"🥩", map:"https://maps.app.goo.gl/EidrZrdWR9zRfxuR8"},
+  ],
+  [ // Day 2
+    {name:"CLASS THE FIRST（出發）", lat:24.7627, lng:125.3658, icon:"🛌", map:"https://maps.app.goo.gl/grPNMBsPNkLGae3T7"},
+    {name:"ユニの浜 空拍集合（Twuriba Marina）", lat:24.8024, lng:125.2632, icon:"📸", map:"https://maps.app.goo.gl/BnhwmtJZzLzBqaDc6"},
+    {name:"HARRY'S Shrimp Truck", lat:24.9081, lng:125.2582, icon:"🍤", map:"https://maps.app.goo.gl/N1cyzFyCBDwjuTnu9"},
+    {name:"Gelato Cafe Ninufa", lat:24.9299, lng:125.2334, icon:"🍦", map:"https://maps.app.goo.gl/7Jy7KimaXeT8HCYa8"},
+    {name:"Yukishio Salt Factory", lat:24.9022, lng:125.2684, icon:"🧂", map:"https://maps.app.goo.gl/xUrCurYLgqeqrb9x6"},
+    {name:"宮古島海中公園", lat:24.8787, lng:125.2747, icon:"🐠", map:"https://maps.app.goo.gl/ZE87besQSMaFMZ9M6"},
+    {name:"AYANNA Miyako", lat:24.8070, lng:125.2135, icon:"🛌", map:"https://maps.app.goo.gl/rqBb9JEwZM5VRMpn7"},
+  ],
+  [ // Day 3
+    {name:"AYANNA Miyako（出發）", lat:24.8070, lng:125.2135, icon:"🛌", map:"https://maps.app.goo.gl/rqBb9JEwZM5VRMpn7"},
+    {name:"Nakayukui Shoten", lat:24.8259, lng:125.1700, icon:"🍠", map:"https://maps.app.goo.gl/pJXebcKzWehXC9fu5"},
+    {name:"海龜浮潛（待定）", lat:24.8050, lng:125.2900, icon:"🤿", map:null},
+    {name:"砂山ビーチ", lat:24.8396, lng:125.2807, icon:"🏖️", map:"https://maps.app.goo.gl/8aX2cFV7nxJ5vFUD8"},
+    {name:"San-A Miyakojima City", lat:24.7764, lng:125.2976, icon:"🛍️", map:"https://maps.app.goo.gl/bcGXcbPj5LgBubui6"},
+    {name:"星空攝影 KOA", lat:24.7174, lng:125.2407, icon:"🌟", map:"https://maps.app.goo.gl/afvPdPXksnTwYJQ66"},
+    {name:"唐吉訶德", lat:24.7925, lng:125.3016, icon:"🛒", map:"https://maps.app.goo.gl/7jM2jYzGEBmmMn927"},
+    {name:"瑰麗 Rosewood", lat:24.8416, lng:125.2876, icon:"🛌", map:"https://maps.app.goo.gl/ugbXSovoVykbX38eA"},
+  ],
+  [ // Day 4
+    {name:"瑰麗 Rosewood（出發）", lat:24.8416, lng:125.2876, icon:"🛌", map:"https://maps.app.goo.gl/ugbXSovoVykbX38eA"},
+    {name:"SUP（集合點待定）", lat:24.8050, lng:125.2900, icon:"🚣", map:null},
+    {name:"Moja's Bakery", lat:24.8071, lng:125.2840, icon:"🍞", map:"https://www.google.com/maps/search/?api=1&query=Moja+Bakery+宮古島"},
+    {name:"下地島機場", lat:24.8267, lng:125.1447, icon:"✈️", map:"https://www.google.com/maps/search/?api=1&query=下地島空港"},
+  ],
+];
+
+var map = null;
+var mapLayers = [];
+
+function initMap(dayIndex) {
+  if (!map) {
+    map = L.map('trip-map', { zoomControl: true, attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 14
+    }).addTo(map);
+  }
+  // Clear previous layers
+  mapLayers.forEach(function(l){ map.removeLayer(l); });
+  mapLayers = [];
+
+  var coords = DAY_COORDS[dayIndex];
+  if (!coords || coords.length === 0) return;
+
+  var latlngs = [];
+  coords.forEach(function(pt, i) {
+    var latlng = [pt.lat, pt.lng];
+    latlngs.push(latlng);
+
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="background:#1A5F7A;color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.35);">' + (i+1) + '</div>',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    });
+
+    var marker = L.marker(latlng, {icon: icon})
+      .on('click', function() {
+        if (pt.map) { window.open(pt.map, '_blank'); }
+      })
+      .addTo(map);
+    mapLayers.push(marker);
+  });
+
+  // Draw route line
+  if (latlngs.length > 1) {
+    var line = L.polyline(latlngs, {
+      color: '#1A5F7A', weight: 2.5,
+      dashArray: '6, 6', opacity: 0.7
+    }).addTo(map);
+    mapLayers.push(line);
+    map.fitBounds(line.getBounds(), {padding: [30, 30]});
+  } else {
+    map.setView(latlngs[0], 13);
+  }
+}
+
+
+
+var DAYS = [
+  {
+    day: 1, date: "9/27", weekday: "SUN",
+    subtitle: "抵達宮古島",
+    hotel: { name: "CLASS THE FIRST", price: "$28,266", rooms: "1間房・加大雙人床×1・雙人床×2", note: "⚠️ 已刷卡不能退款，住宿不含餐", map: "https://maps.app.goo.gl/grPNMBsPNkLGae3T7" },
+    items: [
+      {
+        time: "10:40", dot: "default",
+        tags: [{cls:"tag-flight",txt:"班機"}],
+        title: "JX890 TPE → SHI",
+        sub: "桃園機場第一航廈",
+        info: ["✈️ 10:40 出發・13:00 抵達"],
+        tip: null, map: null
+      },
+      {
+        time: "13:30", dot: "default",
+        tags: [{cls:"tag-food",txt:"午餐"}],
+        title: "川満商店",
+        sub: "宮古島在地雜貨・直火炭烤漢堡排",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=川満商店+宮古島"
+      },
+      {
+        time: "14:30", dot: "default",
+        tags: [{cls:"tag-food",txt:"甜點"}],
+        title: "宮古島市公設市場",
+        sub: "mago tofu 豆腐布丁・必吃！",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=宮古島市公設市場"
+      },
+      {
+        time: "15:30", dot: "default",
+        tags: [{cls:"tag-hotel",txt:"住宿"}],
+        title: "飯店 Check-in",
+        sub: "CLASS THE FIRST",
+        info: [],
+        tip: null, map: "https://maps.app.goo.gl/grPNMBsPNkLGae3T7"
+      },
+      {
+        time: "17:00", dot: "yellow",
+        tags: [{cls:"tag-food",txt:"晚餐"},{cls:"tag-reserved",txt:"✓ 已預約 17:00"}],
+        title: "宮古牛燒肉玉城",
+        sub: "宮古牛・人氣燒肉",
+        info: ["👥 6大1小", "💳 已付訂金 $543"],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=宮古牛燒肉玉城+宮古島"
+      },
+    ]
+  },
+  {
+    day: 2, date: "9/28", weekday: "MON",
+    subtitle: "空拍・伊良部島巡遊",
+    hotel: { name: "AYANNA Miyako", price: "$104,072", rooms: "2間房・1四人房＋1雙人房", note: "入住前15天100%退款，住宿含早/晚餐", map: "https://maps.app.goo.gl/rqBb9JEwZM5VRMpn7" },
+    items: [
+      {
+        time: "11:30", dot: "yellow",
+        tags: [{cls:"tag-activity",txt:"活動"},{cls:"tag-reserved",txt:"✓ 已付款"}],
+        title: "ユニの浜 無人沙灘空拍",
+        sub: "Kkday · 約1小時",
+        info: ["👥 全體 6大1小", "💳 已付 $9,543"],
+        tip: "沙灘空拍超夯體驗，建議穿淺色或白色衣服效果最好！",
+        map: "https://maps.app.goo.gl/BnhwmtJZzLzBqaDc6",
+        link: "https://www.kkday.com/zh-tw/product/551659",
+        linkLabel: "Kkday 行程說明"
+      },
+      {
+        time: "13:00", dot: "default",
+        tags: [{cls:"tag-food",txt:"午餐"}],
+        title: "HARRY'S Shrimp Truck",
+        sub: "奶油蒜蝦飯・人氣餐車",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=HARRY'S+Shrimp+Truck+宮古島"
+      },
+      {
+        time: "14:30", dot: "default",
+        tags: [{cls:"tag-food",txt:"甜點"}],
+        title: "Gelato Cafe Ninufa",
+        sub: "也有 Pizza・池間大橋旁",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=Gelato+Cafe+Ninufa+宮古島"
+      },
+      {
+        time: "15:30", dot: "default",
+        tags: [{cls:"tag-spot",txt:"景點"}],
+        title: "Yukishio Salt Factory",
+        sub: "雪塩製鹽所・宮古島名產",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=Yukishio+Salt+Factory+宮古島"
+      },
+      {
+        time: "16:30", dot: "default",
+        tags: [{cls:"tag-spot",txt:"景點"}],
+        title: "宮古島海中公園",
+        sub: "水中觀景台・看熱帶魚不用下水",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=宮古島海中公園"
+      },
+    ]
+  },
+  {
+    day: 3, date: "9/29", weekday: "TUE",
+    subtitle: "浮潛・市區・星空攝影",
+    hotel: { name: "瑰麗 Rosewood", price: "$223,607", rooms: "海景別墅×2（$67,836/間）＋海濱別墅×1（$87,935/間）", note: "⚠️ 還沒收費，入住才會扣信用卡，住宿含早餐", map: "https://maps.app.goo.gl/ugbXSovoVykbX38eA" },
+    items: [
+      {
+        time: "上午", dot: "default",
+        tags: [{cls:"tag-food",txt:"甜點"}],
+        title: "Nakayukui Shoten",
+        sub: "必吃炸紅薯！",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=Nakayukui+Shoten+宮古島"
+      },
+      {
+        time: "14:00", dot: "yellow",
+        tags: [{cls:"tag-activity",txt:"活動"},{cls:"tag-reserved",txt:"✓ 已預約"}],
+        title: "海龜浮潛",
+        sub: "monkey__navy · 約90分鐘",
+        info: ["👥 4大（苬/佩/瑋/芮妤）"],
+        tip: "攜帶：泳衣（事先穿好）、毛巾、涼鞋、飲用水、防曬衣。浮潛套裝可免費租借。⚠️ 不浮潛備案：Ningin Coffee 休息",
+        map: null,
+        link: "https://www.instagram.com/monkey__navy",
+        linkLabel: "Instagram"
+      },
+      {
+        time: "16:00", dot: "default",
+        tags: [{cls:"tag-spot",txt:"景點"}],
+        title: "砂山ビーチ",
+        sub: "宮古島人氣海灘",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=砂山ビーチ+宮古島",
+        alt: { title: "Ningin Coffee", sub: "☕ 不浮潛休息備案", map: "https://www.google.com/maps/search/?api=1&query=Ningin+Coffee+宮古島" }
+      },
+      {
+        time: "17:30", dot: "default",
+        tags: [{cls:"tag-spot",txt:"購物"}],
+        title: "Yamada Denki Techland",
+        sub: "買電器・開到晚上9點",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=Yamada+Denki+Techland+宮古島"
+      },
+      {
+        time: "18:00", dot: "default",
+        tags: [{cls:"tag-spot",txt:"購物"}],
+        title: "San-A Miyakojima City",
+        sub: "Mall・含無印良品・也有電器・開到晚上10點",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=San-A+Miyakojima+City"
+      },
+      {
+        time: "19:40", dot: "yellow",
+        tags: [{cls:"tag-activity",txt:"活動"},{cls:"tag-warning",txt:"⚠️ 未付款"}],
+        title: "星空フォト KOA",
+        sub: "宮古島星空攝影・約30分鐘",
+        info: ["👥 全體 6大1小", "💰 大人 ¥4,500/人・小學生 ¥3,000・幼兒免費", "🚗 含接送方案：大人 ¥7,000/人"],
+        tip: null,
+        map: "https://maps.app.goo.gl/37xvN5j3ThWqfYJs9",
+        link: "https://www.instagram.com/miyakojima_koa/",
+        linkLabel: "Instagram"
+      },
+      {
+        time: "21:00", dot: "default",
+        tags: [{cls:"tag-spot",txt:"購物"}],
+        title: "唐吉訶德 宮古島店",
+        sub: "宵夜・掃貨",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=唐吉訶德+宮古島"
+      },
+    ]
+  },
+  {
+    day: 4, date: "9/30", weekday: "WED",
+    subtitle: "SUP・返台",
+    hotel: null,
+    items: [
+      {
+        time: "09:00", dot: "default",
+        tags: [{cls:"tag-activity",txt:"活動"},{cls:"tag-warning",txt:"⚠️ 未付款"}],
+        title: "透明 SUP 立槳",
+        sub: "Vibes_miyakojima · 約60～90分鐘",
+        info: ["👥 4大（苬/又㛓/瑋/芮妤）", "💰 ¥16,000×4位 = ¥64,000（現金）"],
+        tip: "攜帶：泳衣（事先穿好）、毛巾、拖鞋、手機防水套、防曬乳。⚠️ 當天僅接受現金付款",
+        map: "https://maps.app.goo.gl/EmQd4agAZtrjgZ9K6",
+        link: "https://www.instagram.com/vibes_miyakojima",
+        linkLabel: "Instagram"
+      },
+      {
+        time: "11:00", dot: "default",
+        tags: [{cls:"tag-food",txt:"甜點"}],
+        title: "Moja's Bakery",
+        sub: "推薦巧克力口味（苦甜）・可去可不去",
+        info: [],
+        tip: null, map: "https://www.google.com/maps/search/?api=1&query=Moja's+Bakery+宮古島"
+      },
+      {
+        time: "14:00", dot: "yellow",
+        tags: [{cls:"tag-flight",txt:"班機"}],
+        title: "JX891 SHI → TPE",
+        sub: "桃園機場第一航廈",
+        info: ["✈️ 14:00 出發・14:10 抵達（台灣時間）"],
+        tip: null, map: null
+      },
+    ]
+  },
+];
+
+var active = 0;
+
+function render() {
+  var tabsEl = document.getElementById('tabs');
+  var contentEl = document.getElementById('content');
+
+  var tabsHtml = '';
+  for (var i = 0; i < DAYS.length; i++) {
+    var d = DAYS[i];
+    var ac = i === active ? 'active' : '';
+    tabsHtml += '<div class="tab ' + ac + '" onclick="go(' + i + ')">'
+      + '<div class="tab-day">Day ' + d.day + '</div>'
+      + '<div class="tab-date">' + d.date + '</div>'
+      + '</div>';
+  }
+  tabsEl.innerHTML = tabsHtml;
+
+  var cur = DAYS[active];
+  var html = '';
+
+  // Day header
+  html += '<div class="day-header">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+  html += '<div>';
+  html += '<div class="day-num">' + cur.day + '<span> / 4</span></div>';
+  html += '<div class="day-weekday">' + cur.date + ' · ' + cur.weekday + '</div>';
+  html += '<div class="day-subtitle">' + cur.subtitle + '</div>';
+  html += '</div>';
+  html += '<div style="font-size:40px;padding-top:8px;">🏖️</div>';
+  html += '</div>';
+
+  if (cur.hotel) {
+    html += '<div class="day-hotel">';
+    html += '<div class="hotel-label">🛌 住宿</div>';
+    html += '<div class="hotel-name">' + cur.hotel.name + '</div>';
+    html += '<div style="font-size:11px;color:#7A6A5A;margin-bottom:2px;">' + cur.hotel.rooms + '</div>';
+    html += '<div class="hotel-price">' + cur.hotel.price + '</div>';
+    html += '<div class="hotel-note">' + cur.hotel.note + '</div>';
+    if (cur.hotel.map) {
+      html += '<a class="map-btn" href="' + cur.hotel.map + '" target="_blank" style="margin-top:8px;">📍 地圖</a>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Timeline
+  html += '<div class="timeline">';
+  for (var j = 0; j < cur.items.length; j++) {
+    var item = cur.items[j];
+    var dotCls = item.dot === 'yellow' ? 'tl-dot yellow' : 'tl-dot';
+    var cardCls = item.dot === 'yellow' ? 'tl-card highlight' : 'tl-card';
+
+    html += '<div class="tl-item">';
+    html += '<div class="tl-time">' + item.time + '</div>';
+    html += '<div class="tl-dot-wrap"><div class="' + dotCls + '"></div></div>';
+    html += '<div class="' + cardCls + '">';
+
+    // Tags
+    var tagHtml = '';
+    for (var t = 0; t < item.tags.length; t++) {
+      tagHtml += '<span class="tag ' + item.tags[t].cls + '">' + item.tags[t].txt + '</span>';
+    }
+    html += '<div>' + tagHtml + '</div>';
+
+    html += '<div class="card-title">' + item.title + '</div>';
+    html += '<div class="card-sub">' + item.sub + '</div>';
+
+    for (var k = 0; k < item.info.length; k++) {
+      html += '<div class="card-info">' + item.info[k] + '</div>';
+    }
+
+    if (item.tip) {
+      html += '<div class="tip-box"><p><span class="tip-icon">💡</span>' + item.tip + '</p></div>';
+    }
+
+    if (item.map) {
+      html += '<a class="map-btn" href="' + item.map + '" target="_blank">📍 地圖</a>';
+    }
+    if (item.link) {
+      html += '<a class="map-btn" href="' + item.link + '" target="_blank" style="margin-left:6px;">🔗 ' + item.linkLabel + '</a>';
+    }
+    if (item.alt) {
+      html += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #E0D8D0;">';
+      html += '<div style="font-size:11px;color:#9E8E80;margin-bottom:4px;">或</div>';
+      html += '<div style="font-size:14px;font-weight:800;color:#4A3A2A;">' + item.alt.title + '</div>';
+      html += '<div style="font-size:12px;color:#8A7A6A;margin-bottom:6px;">' + item.alt.sub + '</div>';
+      if (item.alt.map) html += '<a class="map-btn" href="' + item.alt.map + '" target="_blank">📍 地圖</a>';
+      html += '</div>';
+    }
+
+    html += '</div></div>';
+  }
+  html += '</div>';
+
+
+
+  contentEl.innerHTML = html;
+}
+
+function go(i) { active = i; render(); setTimeout(function(){ initMap(i); }, 100); }
+render();
+setTimeout(function(){ initMap(0); }, 300);
+
+
+</script>
+</body>
+</html>

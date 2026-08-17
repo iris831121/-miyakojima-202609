@@ -302,9 +302,14 @@ function initMap(dayIndex) {
     });
 
     var marker = L.marker(latlng, {icon: icon})
-      .on('click', function() {
-        if (pt.map) { window.open(pt.map, '_blank'); }
-      })
+      .bindPopup(
+        '<div style="text-align:center;padding:6px 4px;">'
+        + '<div style="font-size:14px;font-weight:900;color:#1A1A1A;margin-bottom:8px;">' + pt.icon + ' ' + pt.name + '</div>'
+        + (pt.map
+          ? '<a href="' + pt.map + '" target="_blank" onclick="event.stopPropagation();" style="display:inline-block;background:#1A5F7A;color:white;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">📍 Google Maps</a>'
+          : '<span style="font-size:11px;color:#9E8E80;">集合點待定</span>')
+        + '</div>',
+        {maxWidth: 200, closeButton: true})
       .addTo(map);
     mapLayers.push(marker);
   });
